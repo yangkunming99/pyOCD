@@ -979,9 +979,16 @@ class CortexM(Target):
 
         # Look up the memory region for the requested address. If there is no region,
         # then we can't set a breakpoint.
-        region = self.memory_map.getRegionForAddress(addr)
+        region = None
+        if self.memory_map:
+            region = self.memory_map.getRegionForAddress(addr)
+#        if region is None:
+#            return False
+
+        # Revert to hw bp if no memory map
         if region is None:
-            return False
+            logging.debug("using hw bp instead because no memory map")
+            type = Target.BREAKPOINT_HW
 
         # Determine best type to use if auto.
         if type == Target.BREAKPOINT_AUTO:
@@ -991,7 +998,7 @@ class CortexM(Target):
             #  3. No hw breaks are left.
             #
             # Otherwise use hw.
-            if (addr >= 0x20000000) or (region.isRam) or (self.availableBreakpoint() == 0):
+            if (region is not None) and region.isRam:
                 type = Target.BREAKPOINT_SW
             else:
                 type = Target.BREAKPOINT_HW
@@ -1004,7 +1011,7 @@ class CortexM(Target):
             type = Target.BREAKPOINT_SW
 
         # Revert to hw bp if region is flash.
-        if region.isFlash:
+        if (region is not None) and region.isFlash:
             logging.debug("using hw bp instead because addr is flash")
             type = Target.BREAKPOINT_HW
 
