@@ -97,7 +97,7 @@ class RTL8195AM(CoreSightTarget):
         sleep(0.01)
         self.writeMemory(0x40000300, 0x0006005e)
         sleep(0.01)
-        self.writeMemory(0x40000210, 0x211157)
+        self.writeMemory(0x40000210, 0x8011157)
         logging.debug('rtl8195am 0x%08x=0x%08x', 0x40000210, self.readMemory(0x40000210))
         
 
